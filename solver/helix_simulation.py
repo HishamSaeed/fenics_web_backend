@@ -1,11 +1,12 @@
 from fenics import *
 
-def solveHelixSimulation():
-    t_end =  10.0
-    dt = 0.1
+
+def solve_helix_simulation(simulation):
+    t_end =  simulation.t_end
+    dt = simulation.dt
     k = 300
-    u_in = 20
-    u_out = -20
+    u_in = simulation.u_in
+    u_out = simulation.u_out
 
     xml_file = "./solver/helix_mesh.xml"
     mesh = Mesh(xml_file)
@@ -25,7 +26,7 @@ def solveHelixSimulation():
     a, L = lhs(F), rhs(F)
 
     u = Function(V)
-    t = 0
+    t = simulation.t_start
     vtkfile = File('output/output.pvd')
 
     num_steps = int(t_end/dt)
@@ -36,4 +37,4 @@ def solveHelixSimulation():
         vtkfile << (u, t)
     
 if __name__ == "__main__":
-    solveHelixSimulation()
+    solve_helix_simulation()
