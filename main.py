@@ -6,7 +6,8 @@ from solver.helix_simulation import solve_helix_simulation
 
 @app.route("/simulate", methods=["POST"])
 def simulate():
-    solve_helix_simulation()
+    simulation = get_simulation()
+    solve_helix_simulation(simulation)
 
     return jsonify({"message": "Simulation Finished!"}), 201
 
