@@ -1,6 +1,6 @@
 from fenics import *
 
-def solveHelixSimulation():
+def solve_helix_simulation():
     t_end =  10.0
     dt = 0.1
     k = 300
@@ -36,4 +36,4 @@ def solveHelixSimulation():
         vtkfile << (u, t)
     
 if __name__ == "__main__":
-    solveHelixSimulation()
+    solve_helix_simulation()
