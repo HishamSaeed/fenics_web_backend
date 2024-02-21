@@ -8,7 +8,7 @@ def solve_helix_simulation(simulation):
     u_in = simulation.u_in
     u_out = simulation.u_out
 
-    xml_file = "./solver/helix_mesh.xml"
+    xml_file =  "./solver/" +  simulation.mesh_file_name
     mesh = Mesh(xml_file)
     fd = MeshFunction('size_t', mesh, "./solver/helix_mesh_facet_region.xml")
 

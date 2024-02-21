@@ -161,3 +161,4 @@ cython_debug/
 
 # ignoring output dir
 output/
+meshes/

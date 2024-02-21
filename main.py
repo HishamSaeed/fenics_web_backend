@@ -1,8 +1,8 @@
-from flask import jsonify, request
+from flask import jsonify, request, send_file
 from config import app, db
 from models import Simulation
 from solver.helix_simulation import solve_helix_simulation
-
+import os
 
 @app.route("/simulate", methods=["POST"])
 def simulate():
@@ -55,6 +55,12 @@ def update_u_in(u_in):
     else:
         return jsonify({"uIn": simulation.u_in })
 
+@app.route("/mesh_file_name", methods=["GET"])
+def get_mesh_file_name():
+    simulation = get_simulation()
+    
+    return jsonify({"meshFileName": simulation.mesh_file_name })
+
 @app.route("/u_out/<float:u_out>", methods=["GET", "POST"])
 def update_u_out(u_out):
     simulation = get_simulation()
@@ -64,17 +70,37 @@ def update_u_out(u_out):
         return jsonify({"message": "uOut set"}), 201
     else:
         return jsonify({"uOut": simulation.u_out })
-
+    
 @app.route("/simulation", methods=["GET"])
 def simulation():
     simulation = get_simulation()
     return jsonify({"tStart": simulation.t_start, "tEnd": simulation.t_end, "dt": simulation.dt, "uIn": simulation.u_in, "uOut": simulation.u_out})
 
+@app.route("/download", methods=["GET"])
+def download_file():
+    path = "./solver/helix_mesh_physical_region.xml"
+    return send_file(path, as_attachment=True)
+
+
+@app.route("/upload_mesh", methods=["POST"])
+def upload_mesh():
+    uploaded_file = request.files["file"]
+
+    simulation = get_simulation()
+    simulation.mesh_file_name = uploaded_file.filename
+    db.session.commit()
+    
+    destination = os.path.join('meshes/',uploaded_file.filename)
+    uploaded_file.save(destination)
+
+    return jsonify({"message": "File Uploaded Successfully"}), 201
+
 @app.route("/create_simulation", methods=["POST"])
 def create_simulation():
     simulation = Simulation.query.get(1)
-    db.session.delete(simulation)
-    db.session.commit()
+    if simulation :
+        db.session.delete(simulation)
+        db.session.commit()
 
     new_simulation = Simulation()
     new_simulation.id = 1
@@ -83,6 +109,7 @@ def create_simulation():
     new_simulation.dt = 0.1
     new_simulation.u_in = 20
     new_simulation.u_out = -20
+    new_simulation.mesh_file_name = ""
     db.session.add(new_simulation)
     db.session.commit()
 

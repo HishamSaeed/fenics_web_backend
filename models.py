@@ -7,6 +7,7 @@ class Simulation(db.Model):
     dt = db.Column(db.Float, unique=False, nullable=False)
     u_in = db.Column(db.Float, unique=False, nullable=False)
     u_out = db.Column(db.Float, unique=False, nullable=False)
+    mesh_file_name = db.Column(db.String, unique=False, nullable=False)
 
     def to_json(self):
         return {
@@ -15,4 +16,5 @@ class Simulation(db.Model):
             "dt": self.dt,
             "uIn": self.u_in,
             "uOut": self.u_out,
+            "meshFileName": self.mesh_file_name,
         }
