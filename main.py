@@ -82,16 +82,17 @@ def download_file():
     return send_file(path, as_attachment=True)
 
 
-@app.route("/upload_mesh", methods=["POST"])
+@app.route("/upload_files", methods=["POST"])
 def upload_mesh():
-    uploaded_file = request.files["file"]
 
-    simulation = get_simulation()
-    simulation.mesh_file_name = uploaded_file.filename
-    db.session.commit()
-    
-    destination = os.path.join('meshes/',uploaded_file.filename)
-    uploaded_file.save(destination)
+    uploaded_files = []
+
+    for i in range(len(request.files)):
+        print(request.files)
+        print("file" + str(i))
+        uploaded_files.append(request.files["file" + str(i)])
+        destination = os.path.join('meshes/',uploaded_files[i].filename)
+        uploaded_files[i].save(destination)
 
     return jsonify({"message": "File Uploaded Successfully"}), 201
 
