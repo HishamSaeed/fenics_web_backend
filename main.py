@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from config import app, db
+from config import app, db, socketIo
 from models import Simulation
 from solver.helix_simulation import solve_helix_simulation
 
@@ -18,9 +18,10 @@ def update_t_start():
     if request.method == "POST":
         simulation.t_start = request.json['value']
         db.session.commit()
+        socketIo.emit("update_t_start", simulation.t_start)
         return jsonify({"message": "tStart set"}), 201
     else:
-        return jsonify({"tStart": simulation.t_start })
+        return jsonify({"value": simulation.t_start })
 
 @app.route("/t_end", methods=["GET", "POST"])
 def update_t_end():
@@ -101,4 +102,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
         
-    app.run(debug=True)
+    socketIo.run(app=app, debug=True)
