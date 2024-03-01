@@ -7,7 +7,9 @@ from solver.helix_simulation import solve_helix_simulation
 @app.route("/simulate", methods=["POST"])
 def simulate():
     simulation = get_simulation()
+    socketIo.emit("simulation_running", True)
     solve_helix_simulation(simulation)
+    socketIo.emit("simulation_running", False)
 
     return jsonify({"message": "Simulation Finished!"}), 201
 
@@ -91,6 +93,11 @@ def create_simulation():
     new_simulation.u_out = -20
     db.session.add(new_simulation)
     db.session.commit()
+    socketIo.emit("update_t_start", new_simulation.t_start)
+    socketIo.emit("update_t_end", new_simulation.t_end)
+    socketIo.emit("update_dt", new_simulation.dt)
+    socketIo.emit("update_u_in", new_simulation.u_in)
+    socketIo.emit("update_u_out", new_simulation.u_out)
 
     return jsonify({"message": "Simulation Created!"}), 201
 
