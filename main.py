@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from config import app, db
+from config import app, db, socketIo
 from models import Simulation
 from solver.helix_simulation import solve_helix_simulation
 
@@ -11,59 +11,64 @@ def simulate():
 
     return jsonify({"message": "Simulation Finished!"}), 201
 
-@app.route("/t_start//<float:t_start>", methods=["GET", "POST"])
-def update_t_start(t_start):
+@app.route("/t_start", methods=["GET", "POST"])
+def update_t_start():
     simulation = get_simulation()
 
     if request.method == "POST":
-        simulation.t_start = t_start
+        simulation.t_start = request.json['value']
         db.session.commit()
+        socketIo.emit("update_t_start", simulation.t_start)
         return jsonify({"message": "tStart set"}), 201
     else:
-        return jsonify({"tStart": simulation.t_start })
+        return jsonify({"value": simulation.t_start })
 
-@app.route("/t_end/<float:t_end>", methods=["GET", "POST"])
-def update_t_end(t_end):
+@app.route("/t_end", methods=["GET", "POST"])
+def update_t_end():
     simulation = get_simulation()
 
     if request.method == "POST":
-        simulation.t_end = t_end
+        simulation.t_end = request.json['value']
         db.session.commit()
+        socketIo.emit("update_t_end", simulation.t_end)
         return jsonify({"message": "tEnd set"}), 201
     else:
-        return jsonify({"tEnd": simulation.t_end })
+        return jsonify({"value": simulation.t_end })
 
-@app.route("/dt/<float:dt>", methods=["GET", "POST"])
-def update_dt(dt):
+@app.route("/dt", methods=["GET", "POST"])
+def update_dt():
     simulation = get_simulation()
 
     if request.method == "POST":
-        simulation.dt = dt
+        simulation.dt = request.json['value']
         db.session.commit()
+        socketIo.emit("update_dt", simulation.dt)
         return jsonify({"message": "dt set"}), 201
     else:
-        return jsonify({"dt": simulation.dt })
+        return jsonify({"value": simulation.dt })
     
-@app.route("/u_in/<float:u_in>", methods=["GET", "POST"])
-def update_u_in(u_in):
+@app.route("/u_in", methods=["GET", "POST"])
+def update_u_in():
     simulation = get_simulation()
 
     if request.method == "POST":
-        simulation.u_in = u_in
+        simulation.u_in = request.json['value']
         db.session.commit()
+        socketIo.emit("update_u_in", simulation.u_in)
         return jsonify({"message": "uIn set"}), 201
     else:
-        return jsonify({"uIn": simulation.u_in })
+        return jsonify({"value": simulation.u_in })
 
-@app.route("/u_out/<float:u_out>", methods=["GET", "POST"])
-def update_u_out(u_out):
+@app.route("/u_out", methods=["GET", "POST"])
+def update_u_out():
     simulation = get_simulation()
     if request.method == "POST":
-        simulation.u_out = u_out
+        simulation.u_out = request.json['value']
         db.session.commit()
+        socketIo.emit("update_u_out", simulation.u_out)
         return jsonify({"message": "uOut set"}), 201
     else:
-        return jsonify({"uOut": simulation.u_out })
+        return jsonify({"value": simulation.u_out })
 
 @app.route("/simulation", methods=["GET"])
 def simulation():
@@ -73,8 +78,9 @@ def simulation():
 @app.route("/create_simulation", methods=["POST"])
 def create_simulation():
     simulation = Simulation.query.get(1)
-    db.session.delete(simulation)
-    db.session.commit()
+    if simulation:
+        db.session.delete(simulation)
+        db.session.commit()
 
     new_simulation = Simulation()
     new_simulation.id = 1
@@ -100,4 +106,4 @@ if __name__ == "__main__":
     with app.app_context():
         db.create_all()
         
-    app.run(debug=True)
+    socketIo.run(app=app, debug=True)
