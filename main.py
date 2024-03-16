@@ -104,6 +104,7 @@ def create_simulation():
 
 @app.route("/")
 def home():
+    print("Hello world")
     return 'Hello, world! , this is just a demo for flask . This is a demo for fenicsWeb, test CORS'
 
 def get_simulation():
