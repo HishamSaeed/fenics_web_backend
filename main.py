@@ -108,9 +108,13 @@ def get_simulation():
         return jsonify({"message": "Simulation does not exist"})
     else:
         return simulation
-    
+
+@app.route('/')
+def home():
+    return 'Hello World from fenicsWeb-server'
+   
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
         
-    socketIo.run(app=app, debug=True)
+    socketIo.run(app=app, debug=True, host='0.0.0.0')
