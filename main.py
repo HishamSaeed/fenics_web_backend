@@ -101,6 +101,11 @@ def create_simulation():
 
     return jsonify({"message": "Simulation Created!"}), 201
 
+
+@app.route("/")
+def home():
+    return 'Hello, world! , this is just a demo for flask . This is a demo for fenicsWeb, test CORS'
+
 def get_simulation():
     simulation = Simulation.query.get(1)
 
