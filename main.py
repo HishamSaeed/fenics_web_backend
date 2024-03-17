@@ -20,7 +20,7 @@ def update_t_start():
     if request.method == "POST":
         simulation.t_start = request.json['value']
         db.session.commit()
-        socketIo.emit("update_t_start", simulation.t_start)
+        socketIo.emit("update_t_start", {"value": simulation.t_start})
         return jsonify({"message": "tStart set"}), 201
     else:
         return jsonify({"value": simulation.t_start })
@@ -32,7 +32,7 @@ def update_t_end():
     if request.method == "POST":
         simulation.t_end = request.json['value']
         db.session.commit()
-        socketIo.emit("update_t_end", simulation.t_end)
+        socketIo.emit("update_t_end", {"value": simulation.t_end})
         return jsonify({"message": "tEnd set"}), 201
     else:
         return jsonify({"value": simulation.t_end })
@@ -44,7 +44,7 @@ def update_dt():
     if request.method == "POST":
         simulation.dt = request.json['value']
         db.session.commit()
-        socketIo.emit("update_dt", simulation.dt)
+        socketIo.emit("update_dt", {"value": simulation.dt})
         return jsonify({"message": "dt set"}), 201
     else:
         return jsonify({"value": simulation.dt })
@@ -56,7 +56,7 @@ def update_u_in():
     if request.method == "POST":
         simulation.u_in = request.json['value']
         db.session.commit()
-        socketIo.emit("update_u_in", simulation.u_in)
+        socketIo.emit("update_u_in", {"value": simulation.u_in})
         return jsonify({"message": "uIn set"}), 201
     else:
         return jsonify({"value": simulation.u_in })
@@ -67,10 +67,10 @@ def update_u_out():
     if request.method == "POST":
         simulation.u_out = request.json['value']
         db.session.commit()
-        socketIo.emit("update_u_out", simulation.u_out)
+        socketIo.emit("update_u_out", {"value": simulation.u_in})
         return jsonify({"message": "uOut set"}), 201
     else:
-        return jsonify({"value": simulation.u_out })
+        return jsonify({"value": {"value": simulation.u_out}})
 
 @app.route("/simulation", methods=["GET"])
 def simulation():
@@ -93,11 +93,11 @@ def create_simulation():
     new_simulation.u_out = -20
     db.session.add(new_simulation)
     db.session.commit()
-    socketIo.emit("update_t_start", new_simulation.t_start)
-    socketIo.emit("update_t_end", new_simulation.t_end)
-    socketIo.emit("update_dt", new_simulation.dt)
-    socketIo.emit("update_u_in", new_simulation.u_in)
-    socketIo.emit("update_u_out", new_simulation.u_out)
+    socketIo.emit("update_t_start", {"value": new_simulation.t_start})
+    socketIo.emit("update_t_end", {"value": new_simulation.t_end})
+    socketIo.emit("update_dt", {"value": new_simulation.dt})
+    socketIo.emit("update_u_in", {"value": new_simulation.u_in})
+    socketIo.emit("update_u_out", {"value": new_simulation.u_out})
 
     return jsonify({"message": "Simulation Created!"}), 201
 
@@ -108,9 +108,18 @@ def get_simulation():
         return jsonify({"message": "Simulation does not exist"})
     else:
         return simulation
-    
+@app.route('/publish_events', methods=["POST"])    
+def publish_events():
+    simulation = get_simulation()
+    socketIo.emit("update_t_start", {"value": simulation.t_start})
+    socketIo.emit("update_t_end", {"value": simulation.t_end})
+    socketIo.emit("update_dt", {"value": simulation.dt})
+    socketIo.emit("update_u_in", {"value": simulation.u_in})
+    socketIo.emit("update_u_out", {"value": simulation.u_out})
+    return jsonify({"message": "events published succseefully"})
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
         
-    socketIo.run(app=app, debug=True)
+    socketIo.run(app=app, debug=True, host='0.0.0.0')
