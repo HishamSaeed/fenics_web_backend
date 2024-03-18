@@ -118,6 +118,10 @@ def publish_events():
     socketIo.emit("update_u_out", {"value": simulation.u_out})
     return jsonify({"message": "events published succseefully"})
 
+@app.route('/')
+def home():
+    return 'Hello fenicsWeb'
+
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
